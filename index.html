@@ -1,54 +1,1068 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Очеловечиватель текста</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 700px; margin: auto; background: #f5f5f5; }
-    textarea { width: 100%; height: 180px; margin-bottom: 20px; padding: 10px; font-size: 16px; }
-    button { padding: 10px 20px; font-size: 16px; }
-    .output { background: #fff; padding: 15px; border: 1px solid #ccc; min-height: 150px; white-space: pre-wrap; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гуманизатор текста - сделай текст человеческим</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        .typewriter {
+            border-right: 3px solid #4f46e5;
+            white-space: pre-wrap;
+            overflow: hidden;
+            animation: blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #4f46e5; }
+        }
+
+        .paper-texture {
+            background-image: url('https://www.transparenttextures.com/patterns/notebook.png');
+        }
+
+        .human-score {
+            transition: all 0.3s ease;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #4f46e5;
+            transition: width 0.5s ease;
+        }
+
+        .language-tab {
+            transition: all 0.3s ease;
+        }
+
+        .language-tab.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+
+        /* Simple Modal for messages */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
-  <h1>Очеловечиватель текста 🤖→🧠</h1>
-  <p>Вставь AI-текст ниже — мы его перепишем так, будто его писал человек.</p>
-  <textarea id="inputText" placeholder="Вставь сюда текст от ИИ..."></textarea>
-  <button onclick="humanize()">Очеловечить</button>
-  <h2>Результат:</h2>
-  <div id="output" class="output"></div>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-700 mb-2">
+                <i class="fas fa-user-edit mr-2"></i> Гуманизатор текста
+            </h1>
+            <p class="text-gray-600">Сделай текст более человечным и естественным</p>
 
-  <script>
-    function humanize() {
-      const text = document.getElementById("inputText").value;
+            <div class="flex justify-center mt-4 mb-6">
+                <div class="inline-flex rounded-md shadow-sm">
+                    <button id="lang-ru" class="language-tab active px-4 py-2 text-sm font-medium rounded-l-lg border border-gray-300">
+                        Русский
+                    </button>
+                    <button id="lang-en" class="language-tab px-4 py-2 text-sm font-medium border-t border-b border-gray-300">
+                        English
+                    </button>
+                    <button id="lang-ka" class="language-tab px-4 py-2 text-sm font-medium rounded-r-lg border border-gray-300">
+                        ქართული
+                    </button>
+                </div>
+            </div>
+        </header>
 
-      if (!text.trim()) {
-        document.getElementById("output").innerText = "Пожалуйста, вставьте текст.";
-        return;
-      }
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6 paper-texture">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        <i class="fas fa-keyboard mr-2"></i> Исходный текст
+                    </h2>
+                    <button id="paste-btn" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                        <i class="fas fa-paste mr-1"></i> Вставить
+                    </button>
+                </div>
 
-      // Простейшая имитация очеловечивания (можно доработать)
-      let result = text
-        .replace(/в связи с тем, что/g, 'потому что')
-        .replace(/таким образом/g, 'поэтому')
-        .replace(/является/g, 'это')
-        .replace(/осуществляется/g, 'делается')
-        .replace(/в рамках/g, 'в пределах')
-        .replace(/настоящий документ/g, 'этот документ')
-        .replace(/представляется возможным/g, 'можно')
-        .replace(/в целях/g, 'чтобы')
-        .replace(/необходимо/g, 'нужно')
-        .replace(/имеется/g, 'есть')
-        .replace(/следует отметить, что/g, 'важно отметить, что')
-        .replace(/\bданный\b/g, 'этот')
-        .replace(/\bтаким образом\b/g, 'значит')
-        .replace(/\bвышеперечисленное\b/g, 'всё это')
-        .replace(/\bв том числе\b/g, 'включая')
-        .replace(/\bнаиболее\b/g, 'самый');
+                <textarea id="text-input" class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Введите текст, который нужно сделать более человечным..."></textarea>
 
-      result += "\n\n(переписано в более разговорной форме)";
-      document.getElementById("output").innerText = result;
-    }
-  </script>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="error-level" class="block text-sm font-medium text-gray-700 mb-1">Уровень ошибок</label>
+                        <select id="error-level" class="w-full border border-gray-300 rounded-md p-2">
+                            <option value="1">Минимальный</option>
+                            <option value="2" selected>Средний</option>
+                            <option value="3">Высокий</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="writing-style" class="block text-sm font-medium text-gray-700 mb-1">Стиль письма</label>
+                        <select id="writing-style" class="w-full border border-gray-300 rounded-md p-2">
+                            <option value="formal">Формальный</option>
+                            <option value="neutral" selected>Нейтральный</option>
+                            <option value="casual">Разговорный</option>
+                            <option value="creative">Креативный</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 space-y-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="add-typos" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                        <label for="add-typos" class="ml-2 block text-sm text-gray-700">Добавить опечатки</label>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="add-pauses" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                        <label for="add-pauses" class="ml-2 block text-sm text-gray-700">Добавить паузы и раздумья</label>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="add-emotions" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" checked>
+                        <label for="add-emotions" class="ml-2 block text-sm text-gray-700">Добавить эмоции</label>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex space-x-3">
+                    <button id="humanize-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition duration-300">
+                        <i class="fas fa-magic mr-2"></i> Гуманизировать текст
+                    </button>
+
+                    <button id="clear-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition duration-300">
+                        <i class="fas fa-trash-alt mr-2"></i> Очистить
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6 paper-texture">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        <i class="fas fa-user mr-2"></i> Гуманизированный текст
+                    </h2>
+
+                    <div class="flex items-center">
+                        <span id="human-score" class="human-score text-indigo-600 font-bold mr-2">0%</span>
+                        <div class="progress-bar w-16">
+                            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="output-text" class="w-full h-64 p-4 border border-gray-300 rounded-lg bg-gray-50 overflow-y-auto"></div>
+
+                <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">Средняя длина предложения</p>
+                        <p id="avg-sentence" class="font-semibold">0 слов</p>
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">Уникальность слов</p>
+                        <p id="unique-words" class="font-semibold">0%</p>
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">Эмоциональность</p>
+                        <p id="emotion-level" class="font-semibold">0/10</p>
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">Ошибки</p>
+                        <p id="errors-count" class="font-semibold">0</p>
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <p class="text-sm text-gray-500">Время чтения</p>
+                        <p id="reading-time" class="font-semibold">0 мин</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex space-x-3">
+                    <button id="fix-grammar-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-300">
+                        <i class="fas fa-spell-check mr-2"></i> Исправить грамматику
+                    </button>
+
+                    <button id="copy-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition duration-300">
+                        <i class="fas fa-copy mr-2"></i> Копировать
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-info-circle mr-2"></i> Как это работает?
+            </h2>
+            <div class="prose max-w-none">
+                <p>Гуманизатор текста преобразует сухой, формальный или искусственно сгенерированный текст в более естественный, человеческий вариант. Вот что он делает:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li>Добавляет естественные ошибки и опечатки (по вашему выбору)</li>
+                    <li>Разнообразит структуру предложений</li>
+                    <li>Включает разговорные элементы и паузы</li>
+                    <li>Добавляет эмоциональные оттенки</li>
+                    <li>Адаптирует текст под выбранный стиль письма</li>
+                </ul>
+                <p class="mt-4">Функция "Исправить грамматику" исправляет только те ошибки, которые были добавлены гуманизатором, а не возвращает исходный текст.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modal-message"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- Configuration ---
+            const appConfig = {
+                translations: {
+                    ru: {
+                        title: "Гуманизатор текста",
+                        subtitle: "Сделай текст более человечным и естественным",
+                        inputTitle: "Исходный текст",
+                        outputTitle: "Гуманизированный текст",
+                        pasteBtn: '<i class="fas fa-paste mr-1"></i> Вставить',
+                        humanizeBtn: '<i class="fas fa-magic mr-2"></i> Гуманизировать текст',
+                        processing: '<i class="fas fa-cog fa-spin mr-2"></i> Обработка...',
+                        clearBtn: '<i class="fas fa-trash-alt mr-2"></i> Очистить',
+                        copyBtn: '<i class="fas fa-copy mr-2"></i> Копировать',
+                        fixGrammarBtn: '<i class="fas fa-spell-check mr-2"></i> Исправить грамматику',
+                        fixingGrammar: '<i class="fas fa-cog fa-spin mr-2"></i> Исправление...',
+                        inputPlaceholder: "Введите текст, который нужно сделать более человечным...",
+                        errorLevels: ["Минимальный", "Средний", "Высокий"],
+                        writingStyles: ["Формальный", "Нейтральный", "Разговорный", "Креативный"],
+                        options: ["Добавить опечатки", "Добавить паузы и раздумья", "Добавить эмоции"],
+                        metricsLabels: {
+                            avgSentence: "Средняя длина предложения",
+                            uniqueWords: "Уникальность слов",
+                            emotionLevel: "Эмоциональность",
+                            errorsCount: "Ошибки",
+                            readingTime: "Время чтения"
+                        },
+                        metricsUnits: {
+                            avgSentence: "слов",
+                            readingTime: "мин"
+                        },
+                        howItWorksTitle: "Как это работает?",
+                        howItWorksDescription: "Гуманизатор текста преобразует сухой, формальный или искусственно сгенерированный текст в более естественный, человеческий вариант. Вот что он делает:",
+                        howItWorksList: [
+                            "Добавляет естественные ошибки и опечатки (по вашему выбору)",
+                            "Разнообразит структуру предложений",
+                            "Включает разговорные элементы и паузы",
+                            "Добавляет эмоциональные оттенки",
+                            "Адаптирует текст под выбранный стиль письма"
+                        ],
+                        howItWorksNote: 'Функция "Исправить грамматику" исправляет только те ошибки, которые были добавлены гуманизатором, а не возвращает исходный текст.',
+                        messages: {
+                            pasteError: 'Не удалось получить доступ к буферу обмена. Убедитесь, что разрешили доступ в браузере.',
+                            noTextToHumanize: 'Пожалуйста, введите текст для гуманизации.',
+                            noTextToFix: 'Нет текста для исправления.',
+                            copied: '<i class="fas fa-check mr-2"></i> Скопировано!'
+                        }
+                    },
+                    en: {
+                         title: "Text Humanizer",
+                        subtitle: "Make your text sound more human and natural",
+                        inputTitle: "Source Text",
+                        outputTitle: "Humanized Text",
+                        pasteBtn: '<i class="fas fa-paste mr-1"></i> Paste',
+                        humanizeBtn: '<i class="fas fa-magic mr-2"></i> Humanize Text',
+                        processing: '<i class="fas fa-cog fa-spin mr-2"></i> Processing...',
+                        clearBtn: '<i class="fas fa-trash-alt mr-2"></i> Clear',
+                        copyBtn: '<i class="fas fa-copy mr-2"></i> Copy',
+                        fixGrammarBtn: '<i class="fas fa-spell-check mr-2"></i> Fix Grammar',
+                        fixingGrammar: '<i class="fas fa-cog fa-spin mr-2"></i> Correcting...',
+                        inputPlaceholder: "Enter text to make it more human-like...",
+                        errorLevels: ["Minimal", "Medium", "High"],
+                        writingStyles: ["Formal", "Neutral", "Casual", "Creative"],
+                        options: ["Add typos", "Add pauses and hesitations", "Add emotions"],
+                         metricsLabels: {
+                            avgSentence: "Avg. Sentence Length",
+                            uniqueWords: "Word Uniqueness",
+                            emotionLevel: "Emotionality",
+                            errorsCount: "Errors",
+                            readingTime: "Reading Time"
+                        },
+                        metricsUnits: {
+                            avgSentence: "words",
+                            readingTime: "min"
+                        },
+                        howItWorksTitle: "How It Works?",
+                        howItWorksDescription: "The Text Humanizer transforms dry, formal, or AI-generated text into a more natural, human-like version. Here's what it does:",
+                         howItWorksList: [
+                            "Adds natural errors and typos (optional)",
+                            "Varies sentence structure",
+                            "Includes conversational elements and pauses",
+                            "Adds emotional nuances",
+                            "Adapts text to the chosen writing style"
+                        ],
+                        howItWorksNote: 'The "Fix Grammar" function only corrects the errors added by the humanizer, it does not revert to the original text.',
+                        messages: {
+                            pasteError: 'Failed to access clipboard. Ensure you have granted permission in your browser.',
+                            noTextToHumanize: 'Please enter some text to humanize.',
+                            noTextToFix: 'No text to correct.',
+                            copied: '<i class="fas fa-check mr-2"></i> Copied!'
+                        }
+                    },
+                     ka: {
+                         title: "ტექსტის ჰუმანიზატორი",
+                        subtitle: "გახადეთ ტექსტი უფრო ადამიანური და ბუნებრივი",
+                        inputTitle: "საწყისი ტექსტი",
+                        outputTitle: "ჰუმანიზირებული ტექსტი",
+                        pasteBtn: '<i class="fas fa-paste mr-1"></i> ჩასმა',
+                        humanizeBtn: '<i class="fas fa-magic mr-2"></i> ჰუმანიზაცია',
+                        processing: '<i class="fas fa-cog fa-spin mr-2"></i> დამუშავება...',
+                        clearBtn: '<i class="fas fa-trash-alt mr-2"></i> გასუფთავება',
+                        copyBtn: '<i class="fas fa-copy mr-2"></i> კოპირება',
+                        fixGrammarBtn: '<i class="fas fa-spell-check mr-2"></i> გრამატიკის გასწორება',
+                        fixingGrammar: '<i class="fas fa-cog fa-spin mr-2"></i> გასწორება...',
+                        inputPlaceholder: "შეიყვანეთ ტექსტი, რომ უფრო ადამიანური გახადოთ...",
+                        errorLevels: ["მინიმალური", "საშუალო", "მაღალი"],
+                        writingStyles: ["ფორმალური", "ნეიტრალური", "არაფორმალური", "კრეატიული"],
+                        options: ["დაამატეთ შეცდომები", "დაამატეთ პაუზები და ფიქრები", "დაამატეთ ემოციები"],
+                         metricsLabels: {
+                            avgSentence: "საშუალო წინადადების სიგრძე",
+                            uniqueWords: "სიტყვების უნიკალურობა",
+                            emotionLevel: "ემოციურობა",
+                            errorsCount: "შეცდომები",
+                            readingTime: "წაკითხვის დრო"
+                        },
+                        metricsUnits: {
+                            avgSentence: "სიტყვა",
+                            readingTime: "წთ"
+                        },
+                        howItWorksTitle: "როგორ მუშაობს?",
+                        howItWorksDescription: "ტექსტის ჰუმანიზატორი მშრალ, ფორმალურ ან ხელოვნურად გენერირებულ ტექსტს აქცევს უფრო ბუნებრივ, ადამიანურ ვერსიად. აი რას აკეთებს ის:",
+                         howItWorksList: [
+                            "ამატებს ბუნებრივ შეცდომებს და ბეჭდურ შეცდომებს (სურვილისამებრ)",
+                            "ამრავალფეროვნებს წინადადების სტრუქტურას",
+                            "შეაქვს საუბრის ელემენტები და პაუზები",
+                            "ამატებს ემოციურ ნიუანსებს",
+                            "ადაპტირებს ტექსტს არჩეული წერის სტილის მიხედვით"
+                        ],
+                        howItWorksNote: '"გრამატიკის გასწორება" ფუნქცია მხოლოდ ჰუმანიზატორის მიერ დამატებულ შეცდომებს ასწორებს და არა საწყის ტექსტს.',
+                        messages: {
+                            pasteError: 'Clipboard-ზე წვდომა ვერ მოხერხდა. დარწმუნდით, რომ ნება დართეთ ბრაუზერში.',
+                            noTextToHumanize: 'გთხოვთ, შეიყვანეთ ტექსტი ჰუმანიზაციისთვის.',
+                            noTextToFix: 'არ არის ტექსტი გასასწორებლად.',
+                            copied: '<i class="fas fa-check mr-2"></i> დაკოპირდა!'
+                        }
+                    }
+                },
+                probabilities: { // Probabilities per level (adjust as needed)
+                    typo: [0.005, 0.015, 0.03], // Chance per char
+                    swapTypo: [0.4, 0.5, 0.6], // Chance of swap vs other typo if typo occurs
+                    pause: [0.01, 0.03, 0.05], // Chance per word
+                    emotion: [0.02, 0.06, 0.1], // Chance per sentence (base)
+                    thought: [0.01, 0.03, 0.05] // Chance per paragraph (base)
+                },
+                 styleMultipliers: { // Multipliers for emotion/thought based on style
+                     formal: 0.5,
+                     neutral: 1.0,
+                     casual: 1.5,
+                     creative: 2.0
+                 },
+                textFragments: { // Text elements to insert
+                    ru: {
+                        pauses: ['... ', ' э-э ', ' ну, ', ' так... '],
+                        emotions: ['(улыбается)', '(вздыхает)', '(смеется)', 'кстати,', 'честно говоря,'],
+                        thoughts: ['(Мне вот тут подумалось...)', '(Интересно, а почему так?)', '(Кажется, я отвлекся...)'],
+                        typoMaps: {'е': 'и', 'и': 'е', 'о': 'а', 'а': 'о', 'т': 'д', 'д': 'т', 'с': 'з', 'з': 'с', 'к': 'г', 'г': 'к', 'в': 'ф', 'ф': 'в', 'б': 'п', 'п': 'б', 'ж': 'ш', 'ш': 'ж', 'ч': 'ц', 'ц': 'ч'}
+                    },
+                    en: {
+                        pauses: ['... ', ' uhm ', ' well, ', ' so... '],
+                        emotions: ['(smiles)', '(sighs)', '(laughs)', 'by the way,', 'honestly,'],
+                        thoughts: ['(Just a thought...)', '(Wonder why that is?)', '(I think I got sidetracked...)'],
+                        typoMaps: {'e': 'i', 'i': 'e', 'o': 'a', 'a': 'o', 't': 'd', 'd': 't', 's': 'z', 'z': 's', 'k': 'g', 'g': 'k', 'v': 'f', 'f': 'v', 'b': 'p', 'p': 'b'}
+                    },
+                    ka: {
+                        pauses: ['... ', ' ემმ ', ' ნუ, ', ' ასე... '],
+                        emotions: ['(იღიმება)', '(ოხრავს)', '(იცინის)', 'სხვათა შორის,', 'მართალი გითხრათ,'],
+                        thoughts: ['(აქ გამახსენდა...)', '(საინტერესოა, რატომ?)', '(მგონი გადავუხვიე თემას...)'],
+                        typoMaps: {'ე': 'ი', 'ი': 'ე', 'ო': 'ა', 'ა': 'ო', 'ტ': 'დ', 'დ': 'ტ', 'ს': 'ზ', 'ზ': 'ს', 'კ': 'გ', 'გ': 'კ', 'ვ': 'ფ', 'ფ': 'ვ', 'ბ': 'პ', 'პ': 'ბ'}
+                    }
+                }
+            };
+
+            // --- UI Elements and State ---
+            const elements = {
+                textInput: document.getElementById('text-input'),
+                outputText: document.getElementById('output-text'),
+                humanizeBtn: document.getElementById('humanize-btn'),
+                clearBtn: document.getElementById('clear-btn'),
+                copyBtn: document.getElementById('copy-btn'),
+                pasteBtn: document.getElementById('paste-btn'),
+                fixGrammarBtn: document.getElementById('fix-grammar-btn'),
+                errorLevelSelect: document.getElementById('error-level'),
+                writingStyleSelect: document.getElementById('writing-style'),
+                addTyposCheckbox: document.getElementById('add-typos'),
+                addPausesCheckbox: document.getElementById('add-pauses'),
+                addEmotionsCheckbox: document.getElementById('add-emotions'),
+                humanScoreSpan: document.getElementById('human-score'),
+                progressFillDiv: document.getElementById('progress-fill'),
+                avgSentenceP: document.getElementById('avg-sentence'),
+                uniqueWordsP: document.getElementById('unique-words'),
+                emotionLevelP: document.getElementById('emotion-level'),
+                errorsCountP: document.getElementById('errors-count'),
+                readingTimeP: document.getElementById('reading-time'),
+                langRuBtn: document.getElementById('lang-ru'),
+                langEnBtn: document.getElementById('lang-en'),
+                langKaBtn: document.getElementById('lang-ka'),
+                modal: document.getElementById("myModal"),
+                modalMessage: document.getElementById("modal-message"),
+                closeModalButton: document.getElementsByClassName("close-button")[0],
+                titleHeader: document.querySelector('header h1'),
+                subtitleP: document.querySelector('header p'),
+                inputTitleH2: document.querySelector('.grid > div:first-child h2'),
+                outputTitleH2: document.querySelector('.grid > div:last-child h2'),
+                metricsLabels: {
+                     avgSentence: document.querySelector('#avg-sentence').previousElementSibling,
+                     uniqueWords: document.querySelector('#unique-words').previousElementSibling,
+                     emotionLevel: document.querySelector('#emotion-level').previousElementSibling,
+                     errorsCount: document.querySelector('#errors-count').previousElementSibling,
+                     readingTime: document.querySelector('#reading-time').previousElementSibling,
+                },
+                 howItWorksTitleH2: document.querySelector('.mt-8 h2'),
+                 howItWorksDescriptionP: document.querySelector('.mt-8 .prose > p:first-of-type'),
+                 howItWorksListUl: document.querySelector('.mt-8 .prose ul'),
+                 howItWorksNoteP: document.querySelector('.mt-8 .prose > p:last-of-type')
+
+            };
+
+            let currentLanguage = 'ru';
+            let originalText = ''; // Store original text for comparison
+
+            // --- Modal Functions ---
+            const showModal = (message) => {
+                elements.modalMessage.innerHTML = message;
+                elements.modal.style.display = "flex";
+            };
+
+            const hideModal = () => {
+                elements.modal.style.display = "none";
+            };
+
+            elements.closeModalButton.onclick = hideModal;
+            window.onclick = (event) => {
+                if (event.target === elements.modal) {
+                    hideModal();
+                }
+            };
+
+            // --- UI Initialization & Updates ---
+            const updateUI = () => {
+                const langConfig = appConfig.translations[currentLanguage];
+
+                elements.titleHeader.innerHTML = `<i class="fas fa-user-edit mr-2"></i> ${langConfig.title}`;
+                elements.subtitleP.textContent = langConfig.subtitle;
+                elements.inputTitleH2.innerHTML = `<i class="fas fa-keyboard mr-2"></i> ${langConfig.inputTitle}`;
+                elements.outputTitleH2.innerHTML = `<i class="fas fa-user mr-2"></i> ${langConfig.outputTitle}`;
+                elements.pasteBtn.innerHTML = langConfig.pasteBtn;
+                elements.humanizeBtn.innerHTML = langConfig.humanizeBtn;
+                elements.clearBtn.innerHTML = langConfig.clearBtn;
+                elements.copyBtn.innerHTML = langConfig.copyBtn;
+                elements.fixGrammarBtn.innerHTML = langConfig.fixGrammarBtn;
+                elements.textInput.placeholder = langConfig.inputPlaceholder;
+
+                // Update options in selects
+                Array.from(elements.errorLevelSelect.options).forEach((opt, i) => opt.textContent = langConfig.errorLevels[i]);
+                Array.from(elements.writingStyleSelect.options).forEach((opt, i) => opt.textContent = langConfig.writingStyles[i]);
+
+                // Update checkbox labels
+                 const checkboxLabels = document.querySelectorAll('.mt-4.space-y-2 label'); // More specific selector
+                 checkboxLabels.forEach((label, i) => {
+                    // Assuming the order in HTML matches the order in the translations array
+                    label.textContent = langConfig.options[i];
+                 });
+
+
+                // Update metric labels
+                elements.metricsLabels.avgSentence.textContent = langConfig.metricsLabels.avgSentence;
+                elements.metricsLabels.uniqueWords.textContent = langConfig.metricsLabels.uniqueWords;
+                elements.metricsLabels.emotionLevel.textContent = langConfig.metricsLabels.emotionLevel;
+                elements.metricsLabels.errorsCount.textContent = langConfig.metricsLabels.errorsCount;
+                elements.metricsLabels.readingTime.textContent = langConfig.metricsLabels.readingTime;
+
+                // Update metric units (keep the number, change the unit text)
+                 elements.avgSentenceP.textContent = (parseInt(elements.avgSentenceP.textContent) || 0) + ' ' + langConfig.metricsUnits.avgSentence;
+                 elements.readingTimeP.textContent = (parseInt(elements.readingTimeP.textContent) || 0) + ' ' + langConfig.metricsUnits.readingTime;
+
+
+                // Update How It Works section
+                elements.howItWorksTitleH2.innerHTML = `<i class="fas fa-info-circle mr-2"></i> ${langConfig.howItWorksTitle}`;
+                elements.howItWorksDescriptionP.textContent = langConfig.howItWorksDescription;
+                elements.howItWorksListUl.innerHTML = langConfig.howItWorksList.map(item => `<li>${item}</li>`).join('');
+                elements.howItWorksNoteP.textContent = langConfig.howItWorksNote;
+
+                // Update language tabs
+                elements.langRuBtn.classList.toggle('active', currentLanguage === 'ru');
+                elements.langEnBtn.classList.toggle('active', currentLanguage === 'en');
+                elements.langKaBtn.classList.toggle('active', currentLanguage === 'ka');
+
+            };
+
+            const resetMetrics = () => {
+                elements.humanScoreSpan.textContent = '0%';
+                elements.progressFillDiv.style.width = '0%';
+                elements.humanScoreSpan.classList.remove('text-green-600', 'text-yellow-600');
+                elements.humanScoreSpan.classList.add('text-indigo-600'); // Default color
+                elements.avgSentenceP.textContent = '0 ' + appConfig.translations[currentLanguage].metricsUnits.avgSentence;
+                elements.uniqueWordsP.textContent = '0%';
+                elements.emotionLevelP.textContent = '0/10';
+                elements.errorsCountP.textContent = '0';
+                elements.readingTimeP.textContent = '0 ' + appConfig.translations[currentLanguage].metricsUnits.readingTime;
+            };
+
+            const updateProcessingState = (isProcessing, btn, originalHtml) => {
+                btn.disabled = isProcessing;
+                btn.innerHTML = isProcessing ? appConfig.translations[currentLanguage].processing : originalHtml;
+            };
+
+
+            // --- Core Logic Functions ---
+
+            const humanizeText = async (text) => {
+                const errorLevel = parseInt(elements.errorLevelSelect.value);
+                const style = elements.writingStyleSelect.value;
+                const options = {
+                    addTypos: elements.addTyposCheckbox.checked,
+                    addPauses: elements.addPausesCheckbox.checked,
+                    addEmotions: elements.addEmotionsCheckbox.checked
+                };
+                 const langConfig = appConfig.textFragments[currentLanguage];
+                 const probabilities = appConfig.probabilities;
+                 const styleMultipliers = appConfig.styleMultipliers;
+
+                updateProcessingState(true, elements.humanizeBtn, appConfig.translations[currentLanguage].humanizeBtn);
+
+                // Simulate async processing
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                let result = text;
+
+                // Apply transformations based on options and settings
+                if (options.addTypos) {
+                    result = addTyposToText(result, errorLevel, currentLanguage, probabilities.typo[errorLevel - 1], probabilities.swapTypo[errorLevel - 1], langConfig.typoMaps);
+                }
+
+                 result = varySentenceStructure(result, style, currentLanguage, probabilities.thought[errorLevel-1] * styleMultipliers[style], langConfig.thoughts); // Vary structure and add thoughts
+
+                 if (options.addPauses) {
+                    result = addPausesAndHesitations(result, errorLevel, currentLanguage, probabilities.pause[errorLevel - 1], langConfig.pauses);
+                }
+
+                 if (options.addEmotions) {
+                    result = addEmotionalElements(result, errorLevel, currentLanguage, probabilities.emotion[errorLevel - 1] * styleMultipliers[style], langConfig.emotions);
+                }
+
+
+                lastHumanizedText = result; // Store for grammar fixing
+                elements.outputText.textContent = result;
+
+                analyzeText(result, originalText, currentLanguage);
+
+                updateProcessingState(false, elements.humanizeBtn, appConfig.translations[currentLanguage].humanizeBtn);
+            };
+
+            const fixGrammar = async (text) => {
+                 updateProcessingState(true, elements.fixGrammarBtn, appConfig.translations[currentLanguage].fixGrammarBtn);
+
+                 // Simulate async processing
+                 await new Promise(resolve => setTimeout(resolve, 1500));
+
+                let result = text;
+
+                // Apply fixing steps based on language
+                switch(currentLanguage) {
+                    case 'ru':
+                        result = fixRussianGrammar(result, appConfig.textFragments.ru.pauses, appConfig.textFragments.ru.emotions, appConfig.textFragments.ru.thoughts, appConfig.textFragments.ru.typoMaps);
+                        break;
+                    case 'en':
+                        result = fixEnglishGrammar(result, appConfig.textFragments.en.pauses, appConfig.textFragments.en.emotions, appConfig.textFragments.en.thoughts, appConfig.textFragments.en.typoMaps);
+                        break;
+                    case 'ka':
+                        result = fixGeorgianGrammar(result, appConfig.textFragments.ka.pauses, appConfig.textFragments.ka.emotions, appConfig.textFragments.ka.thoughts, appConfig.textFragments.ka.typoMaps);
+                        break;
+                     default:
+                         // No specific fixer, just basic clean
+                         result = cleanTextBasic(result);
+                         break;
+                }
+
+                elements.outputText.textContent = result;
+
+                 // After fixing, the "human score" should ideally increase, and errors decrease.
+                 // We can simulate a higher score or re-analyze relative to original.
+                 // Let's re-analyze relative to the original text.
+                analyzeText(result, originalText, currentLanguage);
+
+
+                 updateProcessingState(false, elements.fixGrammarBtn, appConfig.translations[currentLanguage].fixGrammarBtn);
+            };
+
+
+            // --- Text Transformation Implementations (Simplified) ---
+
+             const addTyposToText = (text, level, language, typoChance, swapChance, typoMaps) => {
+                let result = '';
+                for (let i = 0; i < text.length; i++) {
+                    let char = text[i];
+                    let lowerChar = char.toLowerCase();
+
+                    if (Math.random() < typoChance) {
+                        // Decide type of typo
+                        const typoType = Math.random();
+
+                        if (typoType < swapChance && i < text.length - 1) {
+                             // Swap adjacent
+                            result += text[i+1] + text[i];
+                            i++;
+                        } else if (typoMaps && typoMaps[lowerChar]) {
+                             // Common typo replacement
+                             const typoChar = typoMaps[lowerChar];
+                             result += (char === lowerChar) ? typoChar : typoChar.toUpperCase();
+                        } else if (typoType < swapChance + (1 - swapChance)/2) { // Repeat char
+                             result += char + char;
+                        }
+                         // Else: Omit char (do nothing)
+                    } else {
+                        result += char;
+                    }
+                }
+                return result;
+            };
+
+            const varySentenceStructure = (text, style, language, thoughtChance, thoughts) => {
+                 const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                 let result = [];
+
+                 sentences.forEach(sentence => {
+                     let modifiedSentence = sentence.trim();
+                     // Basic variations: remove some commas, add others, break long sentences (placeholder)
+                     if (style === 'casual' || style === 'creative') {
+                          modifiedSentence = modifiedSentence.replace(/, /g, Math.random() < 0.5 ? '... ' : ', ');
+                     }
+
+                      result.push(modifiedSentence);
+                 });
+
+                 // Rejoin sentences with style-specific separators and add thoughts between paragraphs
+                 const separators = {
+                     formal: ['. ', '. ', '. '],
+                     neutral: ['. ', '. ', '! '],
+                     casual: ['... ', '. ', '! ', '?\n'],
+                     creative: ['... ', '.\n', '!\n', '?\n']
+                 };
+
+                 let finalResult = '';
+                 const paragraphs = result.join('. ').split('\n\n'); // Join sentences then split into paragraphs (simplified)
+
+                 paragraphs.forEach((para, pIndex) => {
+                     finalResult += para.trim();
+                     if (Math.random() < thoughtChance && thoughts.length > 0) {
+                         finalResult += '\n\n' + thoughts[Math.floor(Math.random() * thoughts.length)] + '\n\n';
+                     } else if (pIndex < paragraphs.length - 1) {
+                         finalResult += '\n\n'; // Keep original paragraph break if no thought
+                     }
+                 });
+
+                 // Ensure final punctuation (very basic)
+                 if (!finalResult.match(/[.!?]$/) && finalResult.length > 0) {
+                     finalResult += '.';
+                 }
+
+
+                 return finalResult.trim();
+            };
+
+
+            const addPausesAndHesitations = (text, level, language, pauseChance, pauses) => {
+                let result = '';
+                const words = text.split(/\s+/);
+
+                words.forEach((word, index) => {
+                    result += word + ' ';
+                    // Add a pause after a word, but not at the very start/end or after punctuation
+                    if (index > 0 && index < words.length - 1 && word.match(/\w/) && Math.random() < pauseChance && pauses.length > 0) {
+                         result += pauses[Math.floor(Math.random() * pauses.length)];
+                    }
+                });
+                return result.trim();
+            };
+
+             const addEmotionalElements = (text, level, language, emotionChance, emotions) => {
+                 let result = '';
+                 const sentences = text.split(/([.!?]+)/).filter(s => s.trim().length > 0); // Split keeping delimiters
+
+                 for (let i = 0; i < sentences.length; i+=2) {
+                     const sentence = sentences[i];
+                     const delimiter = sentences[i+1] || ''; // Get the delimiter or empty string
+
+                     result += sentence.trim();
+
+                     // Add emotion after a sentence, before its punctuation
+                     if (Math.random() < emotionChance && emotions.length > 0) {
+                          result += ' ' + emotions[Math.floor(Math.random() * emotions.length)];
+                     }
+
+                     result += delimiter + ' '; // Add delimiter and a space
+                 }
+
+                 return result.trim();
+            };
+
+
+            // --- Grammar Fixing Implementations (More Specific) ---
+
+            const cleanTextBasic = (text) => {
+                 let result = text;
+                 // Remove extra spaces
+                 result = result.replace(/\s+/g, ' ').trim();
+                 // Fix basic punctuation spacing (space before, no space after except sentence end)
+                 result = result.replace(/\s+([.,!?;:])\s*/g, '$1 '); // Space after punctuation, no space before
+                 result = result.replace(/([.,!?;:])\s*([a-zA-Zа-яА-Яა-ჰ])/g, '$1 $2'); // Ensure space after punctuation before a letter
+                 result = result.replace(/([.!?])\s*([a-zA-Zа-яА-Яა-ჰ])/g, '$1 $2'); // Explicitly for sentence ends
+                 result = result.replace(/([.,!?;:])\s*$/g, '$1'); // Remove trailing space after punctuation at end of string/line
+
+
+                 return result.trim();
+            };
+
+
+            const fixRussianGrammar = (text, pauses, emotions, thoughts, typoMaps) => {
+                let result = cleanTextBasic(text);
+
+                // Remove specific humanizing elements
+                const allHumanElements = [...pauses, ...emotions, ...thoughts, 'э-э', 'ну,', 'так...', '(улыбается)', '(вздыхает)', '(смеется)', 'кстати,', 'честно говоря,', '(Мне вот тут подумалось...)', '(Интересно, а почему так?)', '(Кажется, я отвлекся...)'];
+                allHumanElements.forEach(element => {
+                    // Escape special regex characters if needed, for now simple replace
+                    const escapedElement = element.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').trim();
+                    result = result.replace(new RegExp(escapedElement.replace(/\s/g, '\\s*'), 'gi'), ' '); // Remove element and surrounding space
+                });
+
+                 // Attempt to fix common typos (basic reversal)
+                 const typoMapsReverse = Object.fromEntries(Object.entries(typoMaps).map(([key, val]) => [val, key]));
+                 for (const typo in typoMapsReverse) {
+                     const original = typoMapsReverse[typo];
+                     // Simple regex replace for whole words or parts that look like the typo
+                      result = result.replace(new RegExp(`\\b${typo}\\b`, 'gi'), original); // Word boundary
+                      result = result.replace(new RegExp(typo + typo, 'gi'), typo); // Repeated chars
+                 }
+
+
+                 result = cleanTextBasic(result); // Clean again after removals
+
+                // Capitalize first letter of sentences (basic)
+                result = result.replace(/(^|\.\s+|\!\s+|\?\s+)([а-я])/gi, (match, p1, p2) => p1 + p2.toUpperCase());
+
+
+                return result.trim();
+            };
+
+            const fixEnglishGrammar = (text, pauses, emotions, thoughts, typoMaps) => {
+                let result = cleanTextBasic(text);
+
+                 // Remove specific humanizing elements
+                 const allHumanElements = [...pauses, ...emotions, ...thoughts, 'uhm', 'well,', 'so...', '(smiles)', '(sighs)', '(laughs)', 'by the way,', 'honestly,', '(Just a thought...)', '(Wonder why that is?)', '(I think I got sidetracked...)'];
+                 allHumanElements.forEach(element => {
+                    const escapedElement = element.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').trim();
+                    result = result.replace(new RegExp(escapedElement.replace(/\s/g, '\\s*'), 'gi'), ' ');
+                });
+
+                 // Attempt to fix common typos (basic reversal)
+                 const typoMapsReverse = Object.fromEntries(Object.entries(typoMaps).map(([key, val]) => [val, key]));
+                 for (const typo in typoMapsReverse) {
+                     const original = typoMapsReverse[typo];
+                     result = result.replace(new RegExp(`\\b${typo}\\b`, 'gi'), original);
+                     result = result.replace(new RegExp(typo + typo, 'gi'), typo);
+                 }
+
+                 result = cleanTextBasic(result); // Clean again
+
+                // Capitalize first letter of sentences
+                result = result.replace(/(^|\.\s+|\!\s+|\?\s+)([a-z])/gi, (match, p1, p2) => p1 + p2.toUpperCase());
+
+                return result.trim();
+            };
+
+             const fixGeorgianGrammar = (text, pauses, emotions, thoughts, typoMaps) => {
+                let result = cleanTextBasic(text);
+
+                 // Remove specific humanizing elements
+                 const allHumanElements = [...pauses, ...emotions, ...thoughts, 'ემმ', 'ნუ,', 'ასე...', '(იღიმება)', '(ოხრავს)', '(იცინის)', 'სხვათა შორის,', 'მართალი გითხრათ,', '(აქ გამახსენდა...)', '(საინტერესოა, რატომ?)', '(მგონი გადავუხვიე თემას...)'];
+                 allHumanElements.forEach(element => {
+                    const escapedElement = element.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').trim();
+                    result = result.replace(new RegExp(escapedElement.replace(/\s/g, '\\s*'), 'gi'), ' ');
+                });
+
+                 // Attempt to fix common typos (basic reversal)
+                 const typoMapsReverse = Object.fromEntries(Object.entries(typoMaps).map(([key, val]) => [val, key]));
+                 for (const typo in typoMapsReverse) {
+                     const original = typoMapsReverse[typo];
+                     result = result.replace(new RegExp(`\\b${typo}\\b`, 'gi'), original);
+                     result = result.replace(new RegExp(typo + typo, 'gi'), typo);
+                 }
+
+                 result = cleanTextBasic(result); // Clean again
+
+                // Georgian capitalization is different - removing the basic capitalization rule from others.
+                // A proper fix would require linguistic rules.
+
+                return result.trim();
+            };
+
+
+            // --- Analysis Functions ---
+
+            const countErrors = (text, originalText, language) => {
+                 if (!originalText || text.trim() === originalText.trim()) return 0;
+
+                // Simple diff based on word changes
+                const cleanText = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 0);
+                const cleanOriginal = originalText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 0);
+
+                let errors = 0;
+                const maxLength = Math.min(cleanText.length, cleanOriginal.length);
+
+                for (let i = 0; i < maxLength; i++) {
+                    if (cleanText[i] !== cleanOriginal[i]) {
+                        errors++;
+                    }
+                }
+                errors += Math.abs(cleanText.length - cleanOriginal.length);
+
+                 // Penalty for elements fixGrammar should remove but didn't
+                 const langFragments = appConfig.textFragments[language];
+                 const humanElementsRegex = new RegExp([
+                     ...langFragments.pauses, ...langFragments.emotions, ...langFragments.thoughts,
+                     // Add specific ones not in fragments if any
+                     'э-э', 'ну,', 'так...', 'uhm', 'well,', 'so...', '(smiles)', '(sighs)', '(laughs)', 'by the way,', 'honestly,',
+                      '(Just a thought...)', '(Wonder why that is?)', '(I think I got sidetracked...)',
+                      'ემმ', 'ნუ,', 'ასე...', '(იღიმება)', '(ოხრავს)', '(იცინის)', 'სხვათა შორის,', 'მართალი გითხრათ,',
+                      '(აქ გამახსენდა...)', '(საინტერესოა, რატომ?)', '(მგონი გადავუხვიე თემას...)'
+                 ].map(e => e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s/g, '\\s*')).join('|'), 'gi');
+
+
+                 const remainingHumanElements = (text.match(humanElementsRegex) || []).length;
+                 errors += remainingHumanElements * 1.5; // Penalty for elements that should have been fixed
+
+
+                return Math.round(errors);
+            };
+
+            const calculateHumanLikeScore = (text, originalText, language) => {
+                if (!originalText || text.trim() === originalText.trim()) return 0;
+
+                const errors = countErrors(text, originalText, language);
+                const words = text.toLowerCase().match(/\b[\w'-]+\b/g) || [];
+                const originalWords = originalText.toLowerCase().match(/\b[\w'-]+\b/g) || [];
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+
+                const langFragments = appConfig.textFragments[language];
+                 const style = elements.writingStyleSelect.value;
+                 const errorLevel = parseInt(elements.errorLevelSelect.value);
+
+                // Count humanizing elements present in the CURRENT text
+                const pauseCount = (text.match(new RegExp(langFragments.pauses.map(e => e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s/g, '\\s*')).join('|'), 'gi')) || []).length;
+                const emotionCount = (text.match(new RegExp(langFragments.emotions.map(e => e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s/g, '\\s*')).join('|'), 'gi')) || []).length;
+                const thoughtCount = (text.match(new RegExp(langFragments.thoughts.map(e => e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s/g, '\\s*')).join('|'), 'gi')) || []).length;
+
+
+                const sentenceCountChange = Math.abs(sentences.length - originalText.split(/[.!?]+/).filter(s => s.trim().length > 0).length);
+
+
+                // Reward is based on the *presence* of intended human elements and structure changes
+                const humanizingReward = (pauseCount * 3) + (emotionCount * 5) + (thoughtCount * 7) + (sentenceCountChange * 2); // Adjusted arbitrary points
+
+                // Reward for uniqueness (if it increased significantly relative to length)
+                 const unique = new Set(words);
+                 const originalUnique = new Set(originalWords);
+                 // Avoid dividing by zero or small numbers
+                 const uniquenessRatio = originalUnique.size > 5 ? (unique.size / originalUnique.size) : 1;
+                 const uniquenessReward = Math.max(0, uniquenessRatio - 1) * 30; // Reward if uniqueness ratio > 1
+
+                // Penalty based on errors count relative to total words
+                const errorPenalty = (errors / Math.max(1, originalWords.length + words.length) * 2) * 100; // Max penalty 100 if errors ~ total words
+
+                 // Base score + rewards - penalties
+                 let score = 30 + humanizingReward + uniquenessReward - errorPenalty;
+
+                // Add a small bonus based on selected error level and options (if they are checked)
+                 let optionBonus = 0;
+                 if(elements.addTyposCheckbox.checked) optionBonus += 5;
+                 if(elements.addPausesCheckbox.checked) optionBonus += 5;
+                 if(elements.addEmotionsCheckbox.checked) optionBonus += 5;
+                 optionBonus += (errorLevel - 1) * 3; // Small bonus for higher level
+
+                 score += optionBonus;
+
+
+                // Clamp score
+                score = Math.max(0, Math.min(100, score));
+
+                return Math.round(score);
+            };
+
+            const analyzeText = (text, originalText, language) => {
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                const words = text.split(/\s+/).filter(w => w.length > 0);
+
+                // Avg Sentence Length
+                const avgLength = (words.length / Math.max(1, sentences.length)).toFixed(1);
+                elements.avgSentenceP.textContent = avgLength + ' ' + appConfig.translations[language].metricsUnits.avgSentence;
+
+                // Uniqueness
+                const lowerWords = text.toLowerCase().match(/\b[\w'-]+\b/g) || [];
+                const unique = new Set(lowerWords);
+                const uniqueness = ((unique.size / Math.max(1, lowerWords.length)) * 100).toFixed(1);
+                elements.uniqueWordsP.textContent = uniqueness + '%';
+
+                // Emotionality (simple count of specific markers + !)
+                 const emotionMarkers = appConfig.textFragments[language].emotions.map(e => e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+                 const emotionRegex = new RegExp(`!|${emotionMarkers}`, 'gi'); // Match ! or emotion phrases
+                 const emotionCount = (text.match(emotionRegex) || []).length;
+
+                const emotionScore = (emotionCount / Math.max(1, sentences.length) * 5).toFixed(1); // Scale to 0-10 (arbitrary)
+                elements.emotionLevelP.textContent = emotionScore + '/10';
+
+
+                // Errors
+                const errors = countErrors(text, originalText, language);
+                elements.errorsCountP.textContent = errors;
+
+                // Reading Time (WPM = 200)
+                const wordsCount = words.length;
+                const readingTimeMinutes = Math.max(1, Math.floor(wordsCount / 200));
+                elements.readingTimeP.textContent = readingTimeMinutes + ' ' + appConfig.translations[language].metricsUnits.readingTime;
+
+                // Human Score
+                const humanLikeScore = calculateHumanLikeScore(text, originalText, language);
+                elements.humanScoreSpan.textContent = humanLikeScore + '%';
+                elements.progressFillDiv.style.width = humanLikeScore + '%';
+
+                elements.humanScoreSpan.classList.remove('text-green-600', 'text-yellow-600', 'text-indigo-600');
+                if (humanLikeScore > 80) {
+                    elements.humanScoreSpan.classList.add('text-green-600');
+                } else if (humanLikeScore > 50) {
+                    elements.humanScoreSpan.classList.add('text-yellow-600');
+                } else {
+                    elements.humanScoreSpan.classList.add('text-indigo-600');
+                }
+            };
+
+
+            // --- Event Listeners ---
+            elements.langRuBtn.addEventListener('click', () => { currentLanguage = 'ru'; updateUI(); resetMetrics(); analyzeText(elements.outputText.textContent, originalText, currentLanguage); });
+            elements.langEnBtn.addEventListener('click', () => { currentLanguage = 'en'; updateUI(); resetMetrics(); analyzeText(elements.outputText.textContent, originalText, currentLanguage); });
+            elements.langKaBtn.addEventListener('click', () => { currentLanguage = 'ka'; updateUI(); resetMetrics(); analyzeText(elements.outputText.textContent, originalText, currentLanguage); });
+
+            elements.pasteBtn.addEventListener('click', async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    elements.textInput.value = text;
+                    elements.outputText.textContent = '';
+                    originalText = text;
+                    resetMetrics();
+                     analyzeText('', originalText, currentLanguage); // Analyze original or empty output
+                } catch (err) {
+                    showModal(appConfig.translations[currentLanguage].messages.pasteError);
+                }
+            });
+
+            elements.clearBtn.addEventListener('click', () => {
+                elements.textInput.value = '';
+                elements.outputText.textContent = '';
+                originalText = '';
+                resetMetrics();
+                 analyzeText('', originalText, currentLanguage);
+            });
+
+            elements.copyBtn.addEventListener('click', () => {
+                if (elements.outputText.textContent.trim() === '') return;
+                navigator.clipboard.writeText(elements.outputText.textContent).then(() => {
+                    const originalHtml = elements.copyBtn.innerHTML;
+                    elements.copyBtn.innerHTML = appConfig.translations[currentLanguage].messages.copied;
+                    setTimeout(() => { elements.copyBtn.innerHTML = originalHtml; }, 2000);
+                }).catch(err => {
+                     console.error("Copy failed:", err);
+                     // Could add a modal message here too
+                });
+            });
+
+            elements.humanizeBtn.addEventListener('click', () => {
+                if (elements.textInput.value.trim() === '') {
+                    showModal(appConfig.translations[currentLanguage].messages.noTextToHumanize);
+                    return;
+                }
+                originalText = elements.textInput.value; // Store original
+                humanizeText(elements.textInput.value);
+            });
+
+            elements.fixGrammarBtn.addEventListener('click', () => {
+                const textToFix = elements.outputText.textContent.trim() !== '' ? elements.outputText.textContent : elements.textInput.value;
+                if (textToFix.trim() === '') {
+                     showModal(appConfig.translations[currentLanguage].messages.noTextToFix);
+                    return;
+                }
+                 // If fixing the output text, use it. If fixing input, update original.
+                 if (elements.outputText.textContent.trim() === '') {
+                     originalText = elements.textInput.value;
+                 }
+                fixGrammar(textToFix);
+            });
+
+             // Initial analysis of empty state
+             analyzeText('', '', currentLanguage);
+             updateUI(); // Ensure UI is set up on load
+        });
+    </script>
 </body>
 </html>
