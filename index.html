@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Очеловечивание текста</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      font-size: 16px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    #outputText {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      min-height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Очеловечить ИИ-текст 🧠 ➜ 👤</h2>
+  <textarea id="inputText" placeholder="Вставьте текст от ИИ сюда..."></textarea><br>
+  <button onclick="humanizeText()">Очеловечить</button>
+  <button onclick="copyText()">📋 Копировать результат</button>
+
+  <div id="outputText"></div>
+
+  <script>
+    function humanizeText() {
+      let text = document.getElementById("inputText").value;
+
+      if (!text.trim()) {
+        document.getElementById("outputText").textContent = "Введите текст выше.";
+        return;
+      }
+
+      const replacements = [
+        [/\bв настоящее время\b/gi, "сейчас"],
+        [/\bнеобходимо отметить, что\b/gi, ""],
+        [/\bтаким образом\b/gi, "поэтому"],
+        [/\bв связи с этим\b/gi, "поэтому"],
+        [/\bв целях\b/gi, "чтобы"],
+        [/\bосуществляется\b/gi, "делается"],
+        [/\bобеспечивает\b/gi, "даёт"],
+        [/\bпредставляет собой\b/gi, "это"],
+        [/\bявляется\b/gi, "это"],
+        [/\bпосредством\b/gi, "через"],
+        [/\bв рамках\b/gi, "в"],
+        [/\bследовательно\b/gi, "поэтому"],
+        [/\bнаправлен на\b/gi, "нужен для"],
+        [/\bданный\b/gi, "этот"],
+        [/\bданная\b/gi, "эта"],
+        [/\bданные\b/gi, "эти"],
+        [/\bоказывает влияние\b/gi, "влияет"],
+        [/\bосуществляет контроль\b/gi, "контролирует"],
+        [/\bимеет место быть\b/gi, "есть"],
+        [/\bв полной мере\b/gi, "полностью"],
+        [/\bв дальнейшем\b/gi, "потом"],
+        [/\bсущественное значение\b/gi, "важно"],
+        [/\bналичие возможности\b/gi, "возможность"],
+        [/\bввиду того, что\b/gi, "потому что"],
+        [/\bв соответствии с\b/gi, "по"],
+        [/\bв случае если\b/gi, "если"],
+        [/\bв рамках реализации\b/gi, "во время"],
+        [/\bс целью\b/gi, "чтобы"],
+        [/\bреализация\b/gi, "выполнение"],
+        [/\bпринимается решение\b/gi, "принимают решение"],
+        [/\bоказание помощи\b/gi, "помощь"],
+        [/\bосуществление контроля\b/gi, "контроль"],
+        [/\bналичие\b/gi, "есть"],
+        [/\bв полной мере\b/gi, "полностью"],
+        [/\bкомплекс мер\b/gi, "меры"],
+        [/\bвышеназванный\b/gi, "этот"],
+        [/\bввиду вышеизложенного\b/gi, ""],
+        [/\bв вышеуказанном случае\b/gi, "в этом случае"]
+      ];
+
+      replacements.forEach(([pattern, replacement]) => {
+        text = text.replace(pattern, replacement);
+      });
+
+      // Удалим двойные пробелы и обрежем
+      text = text.replace(/\s{2,}/g, ' ').trim();
+
+      // Показываем результат
+      document.getElementById("outputText").textContent = text;
+    }
+
+    function copyText() {
+      const text = document.getElementById("outputText").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Результат скопирован!");
+      });
+    }
+  </script>
+</body>
+</html>
